@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #343a40;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .sidebar .profile {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .sidebar .profile img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin-bottom: 10px;
+        }
+
+        .sidebar .menu {
+            width: 100%;
+        }
+
+        .sidebar .menu a {
+            display: block;
+            padding: 10px;
+            color: white;
+            text-decoration: none;
+            border-bottom: 1px solid #495057;
+            text-align: center;
+        }
+
+        .sidebar .menu a:hover {
+            background-color: #495057;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+
+        .task-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        .task-table th, .task-table td {
+            border: 1px solid #dee2e6;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .task-table th {
+            background-color: #343a40;
+            color: white;
+        }
+
+        .task-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .chart-container {
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        canvas {
+            max-width: 400px;
+            max-height: 400px;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="profile">
+          <i class="fa-solid fa-user" style="color: #74C0FC;"></i>
+            <h3>{{data.first_name}}</h3>
+        </div>
+        <div class="menu">
+            <a href="{% url 'show_profile' %}">Profile</a>
+            <a href="{% url 'logout' %}">Logout</a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <h1>Task List</h1>
+        <table class="task-table">
+            <thead>
+                <tr>
+                    <th>Sr No</th>
+                    <th>Task Title</th>
+                    <th>Description</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Status</th>
+                    <th>Priority</th>
+                </tr>
+            </thead>
+            <tbody>
+              
+              {% for task in tasks %}
+              <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ task.assigned_to.first_name }} </td>
+                <td>{{ task.title }}</td>
+                <td>{{ task.description }}</td>
+                <td>
+                  {% if task.priority == 1 %}
+                      High
+                  {% elif task.priority == 2 %}
+                      Mid
+                  {% elif task.priority == 3 %}
+                      Low
+                  {% else %}
+                      Unknown
+                  {% endif %}
+                </td>
+                <td>{{ task.status }}</td>
+                <td>{{ task.start_date }}</td>
+                <td>{{ task.end_date }}</td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="9" class="text-center">No tasks assigned yet.</td>
+              </tr>
+              {% endfor %}
+                 
+            </tbody>
+        </table>
+
+        <div class="chart-container">
+            <canvas id="taskStatusChart"></canvas>
+        </div>
+    </div>
+
+    <script>
+        const ctx = document.getElementById('taskStatusChart').getContext('2d');
+        const taskStatusChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ['Pending', 'Completed', 'In Progress'],
+                datasets: [{
+                    label: 'Task Status',
+                    data: [5, 3, 7],  
+                    backgroundColor: ['#ffc107', '#28a745', '#17a2b8'],
+                }]
+            },
+            options: {
+                responsive: true,
+            }
+        });
+    </script>
+</body>
+</html>
