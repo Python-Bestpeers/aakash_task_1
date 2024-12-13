@@ -1,19 +1,18 @@
-from django.shortcuts import render, redirect 
-from django.contrib.auth.mixins import LoginRequiredMixin 
-from django.contrib.auth import logout ,authenticate ,login
-from django.views import View
-from django.shortcuts import get_object_or_404
-from .models import User,Task,Comment
 import re
-from .forms import TaskForm
-from django.contrib.auth import get_user_model
-from django.db import IntegrityError
-from django.contrib.auth.hashers import make_password
-from django.core.mail import send_mail
+
 from django.conf import settings
-from django.db.models import Q 
+from django.contrib.auth import authenticate, get_user_model, login, logout
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.mail import send_mail
+from django.db import IntegrityError
+from django.shortcuts import get_object_or_404, redirect, render
+from django.views import View
+
+from .forms import TaskForm
+from .models import Comment, Task
 
 User = get_user_model()
+
 
 class Signup(View):
     def get(self, request):
@@ -45,7 +44,7 @@ class Signup(View):
                 return render(request, "signup.html", {"errors": errors})
 
             user = User(first_name=username, email=email)
-            user.set_password(password)  
+            user.set_password(password)
             user.save()
 
             return redirect("login")
@@ -54,7 +53,7 @@ class Signup(View):
         except Exception as e:
             return render(request, 'signup.html', {'error': 'An error occurred', 'details': str(e)})
 
-    
+
 class Login(View):
     def get(self, request):
         return render(request, 'login.html')
@@ -68,41 +67,53 @@ class Login(View):
             login(request, user)
             return redirect('home_page')
         return render(request, 'login.html', {'error': 'Invalid email or password'})
-    
+
+
 class My_Dashboard(LoginRequiredMixin, View):
-    def get(self, request):
-        data= get_object_or_404(User,email=request.user.email)
+    def get(self, request, *args, **kwargs):
+        data = get_object_or_404(User, first_name=request.user)
         tasks = Task.objects.filter(assigned_to=request.user)
-        print('Tasks:',tasks)
-        return render(request, 'my_dashboard.html', {'tasks': tasks,'data':data})
+        print('Username:', data)
+        print("TASKS:", tasks)
+        task_status_count = {
+            'Pending': 0,
+            'Completed': 0,
+        }
+        for task in tasks:
+            if task.status == 'Pending':
+                task_status_count['Pending'] += 1
+            elif task.status == 'Completed':
+                task_status_count['Completed'] += 1
+        return render(request, 'my_dashboard.html', {'tasks': tasks, 'task_status_count': task_status_count, 'data': data})
 
 
 class Show_Profile(LoginRequiredMixin, View):
-    def get(self,request):
-        data=get_object_or_404(User,email=request.user.email)
-        return render(request,'show_profile.html',{'data':data})
+    def get(self, request):
+        data = get_object_or_404(User, email=request.user.email)
+        return render(request, 'show_profile.html', {'data': data})
 
-        
-class Create_Task(LoginRequiredMixin,View):
-    login_url='login'
-    def get(self,request):
-        form=TaskForm()
-        users=User.objects.all()
-        return render(request,'create_task.html',{'form':form,'users':users})
-    
-    def post(self,request):
-        form= TaskForm(request.POST)
+
+class Create_Task(LoginRequiredMixin, View):
+    login_url = 'login'
+
+    def get(self, request):
+        form = TaskForm()
+        users = User.objects.all()
+        return render(request, 'create_task.html', {'form': form, 'users': users})
+
+    def post(self, request):
+        form = TaskForm(request.POST)
         if form.is_valid():
-            title=form.cleaned_data['title']
-            description=form.cleaned_data['description']
-            assigned_to=form.cleaned_data['assigned_to']
-            assigned_by=request.user
-            start_date=form.cleaned_data['start_date']
-            end_date=form.cleaned_data['end_date']
-            priority=form.cleaned_data['priority']
-            status=form.cleaned_data['status']
-            
-            task=Task.objects.create(
+            title = form.cleaned_data['title']
+            description = form.cleaned_data['description']
+            assigned_to = form.cleaned_data['assigned_to']
+            assigned_by = request.user
+            start_date = form.cleaned_data['start_date']
+            end_date = form.cleaned_data['end_date']
+            priority = form.cleaned_data['priority']
+            status = form.cleaned_data['status']
+
+            Task.objects.create(
                 title=title,
                 description=description,
                 assigned_to=assigned_to,
@@ -112,8 +123,8 @@ class Create_Task(LoginRequiredMixin,View):
                 priority=priority,
                 status=status,
             )
-            subject='Task Assigned'
-            message=f'''Task : {title},
+            subject = 'Task Assigned'
+            message = f'''Task : {title},
                         Description: {description},
                         Assigned By: {assigned_by},
                         Priority: {priority}
@@ -121,53 +132,60 @@ class Create_Task(LoginRequiredMixin,View):
                         End Date: {end_date}
             '''
             email_from = settings.EMAIL_HOST_USER
-            recipient_list = [assigned_to.email]     
+            recipient_list = [assigned_to.email]
             send_mail(subject, message, email_from, recipient_list)
             return redirect('home_page')
         else:
-            return render(request,'create_task.html',{"form": form ,"error":'Please correct the errors below.'})
+            return render(request, 'create_task.html', {"form": form, "error": 'Please correct the errors below.'})
 
-                
-class Home_Page(LoginRequiredMixin,View):
-    login_url='login'
-    def get(self,request):
-        task= Task.objects.all()
-        return render(request,'home_page.html',{'tasks':task})
-    
+
+class Home_Page(LoginRequiredMixin, View):
+    login_url = 'login'
+
+    def get(self, request):
+        task = Task.objects.all()
+        return render(request, 'home_page.html', {'tasks': task})
+
+
 class Add_Comment(LoginRequiredMixin, View):
-    login_url = 'login'   
+    login_url = 'login'
+
     def get(self, request, task_id):
-        task = Task.objects.filter(id=task_id).first()   
+        task = Task.objects.filter(id=task_id).first()
         print('Task:', task.id, task.title)
-        return render(request, 'add_comment.html', {'task': task})   
+        return render(request, 'add_comment.html', {'task': task})
 
     def post(self, request, task_id):
-        task = get_object_or_404(Task, id=task_id)   
-        content = request.POST.get('content')   
+        task = get_object_or_404(Task, id=task_id)
+        content = request.POST.get('content')
         print('Task and Content:', task, content)
         Comment.objects.create(task=task, user=request.user, comment=content)
-        return redirect('home_page')  
-    
+        return redirect('home_page')
+
+
 class Show_Detail(LoginRequiredMixin, View):
-    login_url='login'
-    def get(self,request, task_id):
-        task= get_object_or_404(Task,id=task_id)
-        print('Task:',task)
-        return render(request,'show_detail.html',{'task':task})
+    login_url = 'login'
+
+    def get(self, request, task_id):
+        task = get_object_or_404(Task, id=task_id)
+        print('Task:', task)
+        return render(request, 'show_detail.html', {'task': task})
 
 
 
 class Show_Comment(LoginRequiredMixin, View):
-    login_url = 'login'     
+    login_url = 'login'
+
     def get(self, request, task_id):
-        task = get_object_or_404(Task, id=task_id)   
-        comments = Comment.objects.filter(task=task)  
+        task = get_object_or_404(Task, id=task_id)
+        comments = Comment.objects.filter(task=task)
         print('TASK and Comments:', task, comments)
         return render(request, 'show_comments.html', {'task': task, 'comments': comments})
-    
+
 
 class Edit_Task(LoginRequiredMixin, View):
     login_url = 'login'
+
     def get(self, request, task_id):
         task = get_object_or_404(Task, id=task_id)
         return render(request, 'edit_task.html', {'task': task})
@@ -182,9 +200,10 @@ class Edit_Task(LoginRequiredMixin, View):
         task.save()
         return redirect("home_page")
 
-    
+
 class Delete_Task(LoginRequiredMixin, View):
     login_url = 'login'
+
     def get(self, request, task_id):
         try:
             task = get_object_or_404(Task, id=task_id)
@@ -192,13 +211,13 @@ class Delete_Task(LoginRequiredMixin, View):
             return redirect("home_page")
         except Task.DoesNotExist:
             return render(request, "home_page.html", {"error": "Task does not exist"})
-        
+
 # class TaskSearch(LoginRequiredMixin,View):
 #     def get(self,request):
 #         query = request.GET.get('q','')
 #         print(query)
 #         if query:
-           
+
 #           tasks = Task.objects.filter(
 #                 Q(title__icontains=query) |
 #                 Q(end_date=query) |
@@ -211,11 +230,7 @@ class Delete_Task(LoginRequiredMixin, View):
 
 
 
-class Logout(LoginRequiredMixin,View):
-    def get(self,request):
+class Logout(LoginRequiredMixin, View):
+    def get(self, request):
         logout(request)
         return redirect('login')
-             
-
-
- 

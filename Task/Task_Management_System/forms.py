@@ -1,7 +1,9 @@
 from django import forms
-from .models import Task
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+
+from .models import Task
+
 
 class TaskForm(forms.ModelForm):
     class Meta:
@@ -37,7 +39,7 @@ class TaskForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
- 
+
         assigned_to = cleaned_data.get('assigned_to')
         assigned_by = cleaned_data.get('assigned_by')
 

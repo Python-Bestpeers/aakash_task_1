@@ -1,4 +1,4 @@
- 
+
 {% block title %}Create Task{% endblock %}
 <div class="container w-50">
     <form method="post" action="{% url 'create_task' %}" style="margin: 2px;padding: 3px;">
@@ -33,9 +33,9 @@
                 </div>
             {% endif %}
         </div>
- 
 
-  
+
+
         <div class="mb-3">
             <label for="start_date" class="form-label">Start Date</label>
             {{ form.start_date }}
@@ -79,8 +79,7 @@
       </div>
 
 
-     
+
         <button type="submit" class="btn btn-primary btn-lg pull-right">Submit</button>
     </form>
 </div>
- 

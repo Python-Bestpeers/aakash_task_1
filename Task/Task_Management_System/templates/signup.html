@@ -4,7 +4,7 @@
     <title>SignUp</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-    
+
     <style>
         *{
            box-sizing: border-box;
@@ -20,7 +20,7 @@
         align-items: center;
         }
 
-        .container { 
+        .container {
         position: relative;
         width: 766px;
         max-width: 100%;
@@ -172,32 +172,32 @@
         .left {
         transform: translateY(-20%);
         }
- 
+
         .container.right-panel-active .log-in-container {
         transform: translateY(100%);
         }
- 
+
         .container.right-panel-active .overlay-container {
         transform: translateX(-100%);
         }
- 
+
         .container.right-panel-active .sign-up-container {
         transform: translateX(100%);
         opacity: 1;
         z-index: 5;
         }
 
-      
+
         .container.right-panel-active .overlay {
         transform: translateX(50%);
         }
 
-       
+
         .container.right-panel-active .left {
         transform: translateY(0);
         }
 
-      
+
         .container.right-panel-active .right {
         transform: translateY(20%);
         }
@@ -215,10 +215,10 @@
   <body>
     <div class="container" id="container">
       <div class="form-container sign-up-container">
-        
+
       </div>
       <div class="form-container log-in-container">
-        <center> 
+        <center>
           <p style="color: red;">{{error}}</p>
           <form method="post" action="{% url 'signup' %}" autocomplete="off">
             {% csrf_token %}
@@ -237,7 +237,7 @@
             {% endif %}
             <button>Sign Up</button>
           </form>
-           
+
         </center>
       </div>
       <div class="overlay-container">
@@ -248,7 +248,7 @@
           <p>To keep connected with us please login with your personal info</p>
           <button>
             <a href="{% url 'login' %}" class="ghost" id="sign-in">Log In</a>
-          </button>      
+          </button>
         </div>
         </div>
         </div>

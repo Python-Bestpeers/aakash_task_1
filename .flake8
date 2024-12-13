@@ -1,0 +1,13 @@
+[flake8]
+exclude = */docs/*,*/.tox/*,*/.venv/*,*/.pycharm_helpers/*,*/migrations/*,docs/*,fabfile.py,*/__init__.py,django_project/core/settings/*.py,django_project/*/tests/*.py,django_project/*/test_*.py,django_project/frontend/node_modules/*,env/*
+max-line-length = 79
+
+# Ignore specific error and warning codes
+# E125: Continuation line does not distinguish itself from next logical line
+# E126: Continuation line over-indented for hanging indent
+# E251: Unexpected spaces around keyword / parameter equals
+# E303: Too many blank lines (3)
+# W504: Line break occurred after a binary operator
+# W60: Custom warning or error, if applicable
+# F405: Name may be undefined or comes from * imports
+ignore = E125,E126,E251,E303,W504,W60,F405, E501
