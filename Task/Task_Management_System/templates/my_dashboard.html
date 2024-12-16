@@ -153,6 +153,10 @@
                 width: 100%;
             }
         }
+        a.btn:hover {
+            transform: scale(1.1);
+            transition: transform 0.2s ease-in-out;
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -217,14 +221,10 @@
                     </td>
                     <td>
 
-                        <a href="{% url 'update_status' task.id %}" class="btn btn-sm btn-secondary me-2" title="Update Status">
-                            <i class="bi bi-arrow-repeat"></i>
-                        </a>
-
-
                         <a href="{% url 'edit_task' task.id %}" class="btn btn-sm btn-primary me-2" title="Edit Task">
                             <i class="bi bi-pencil-square"></i>
                         </a>
+
 
                         <a href="{% url 'show_detail' task.id %}" class="btn btn-sm btn-info me-2" title="Show Details">
                             <i class="bi bi-chat"></i>

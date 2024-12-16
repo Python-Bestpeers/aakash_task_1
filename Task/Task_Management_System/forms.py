@@ -69,9 +69,7 @@ class SignupForm(forms.ModelForm):
         email = self.clean_data.get("email", "")
         first_name = self.clean_data.get("first_name")
         password = self.clean_data.get("password")
-        # widgets = {
-        #     "password": forms.PasswordInput(attrs={"placeholder": "Enter your password"}),
-        # }
+
         errors = {}
         if not first_name.isalpha():
             errors["first_name"] = "first_name must contain only characters."
@@ -91,7 +89,7 @@ class SignupForm(forms.ModelForm):
 
     def save(self, commit=True):
         user = super().save(commit=False)
-        user.password = make_password(self.cleaned_data["password"])  # Hash the password
+        user.password = make_password(self.cleaned_data["password"])
         if commit:
             user.save()
         return user
