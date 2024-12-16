@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Form</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7fa;
+
+        }
+
+        .form-container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            margin: 50px auto;
+        }
+
+        .form-title {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-control {
+            padding: 12px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            width: 100%;
+        }
+
+        .btn-submit {
+            background-color: #4CAF50;
+            color: #fff;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+        }
+
+        .btn-submit:hover {
+            background-color: #45a049;
+        }
+
+        .form-error {
+            color: red;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+<div class="form-container">
+    <h2 class="form-title" style="background-color: black; color: whitesmoke;">Create New Task</h2>
+    <form method="post" action="{% url 'create_task' %}" style="margin: 2px;padding: 3px;">
+        {% csrf_token %}
+
+        <div class="mb-3">
+            <label for="title" class="form-label">Title</label>
+            {{ form.title }}
+            {% if form.title.errors %}
+                <div class="text-danger">
+                    {{ form.title.errors }}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="mb-3">
+            <label for="description" class="form-label">Description</label>
+            {{ form.description }}
+            {% if form.description.errors %}
+                <div class="text-danger">
+                    {{ form.description.errors }}
+                </div>
+            {% endif %}
+        </div>
+
+         <div class="mb-3">
+            <label for="assigned_to" class="form-label">Assigned To</label>
+            {{ form.assigned_to }}
+            {% if form.assigned_to.errors %}
+                <div class="text-danger">
+                    {{ form.assigned_to.errors }}
+                </div>
+            {% endif %}
+        </div>
+
+
+
+        <div class="mb-3">
+            <label for="start_date" class="form-label">Start Date</label>
+            {{ form.start_date }}
+            {% if form.start_date.errors %}
+                <div class="text-danger">
+                    {{ form.start_date.errors }}
+                </div>
+            {% endif %}
+        </div>
+
+
+        <div class="mb-3">
+          <label for="end_date" class="form-label">End Date</label>
+          {{ form.end_date }}
+          {% if form.end_date.errors %}
+              <div class="text-danger">
+                  {{ form.end_date.errors }}
+              </div>
+          {% endif %}
+      </div>
+
+
+      <div class="mb-3">
+        <label for="status" class="form-label">Status</label>
+        {{ form.status }}
+        {% if form.status.errors %}
+            <div class="text-danger">
+                {{ form.status.errors }}
+            </div>
+        {% endif %}
+      </div>
+
+      <div class="mb-3">
+        <label for="priority" class="form-label">Priority</label>
+        {{ form.priority }}
+        {% if form.priority.errors %}
+            <div class="text-danger">
+                {{ form.priority.errors }}
+            </div>
+        {% endif %}
+      </div>
+
+
+
+        <button type="submit" class="btn btn-primary btn-lg pull-right">Submit</button>
+    </form>
+</div>
+</body>

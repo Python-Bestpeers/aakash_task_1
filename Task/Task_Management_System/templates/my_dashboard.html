@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <title>User Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7fa;
+        }
+
+        h1, h2, h3 {
+            color: #333;
+        }
+
+        .navbar {
+            width: 100%;
+            background-color: #333;
+            color: #fff;
+            position: fixed;
+            top: 0;
+            left: 0;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        .navbar .profile {
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar .profile h3 {
+            margin: 0;
+            font-size: 16px;
+        }
+
+        .navbar .profile img {
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            margin-right: 10px;
+        }
+
+        .navbar .menu {
+            display: flex;
+            gap: 15px;
+        }
+
+        .navbar .menu a {
+            color: #fff;
+            text-decoration: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+
+        .navbar .menu a:hover {
+            background-color: #555;
+        }
+
+        .main-content {
+            padding: 60px 40px 40px 40px;
+        }
+
+        .main-content h1 {
+            color: #5f6368;
+        }
+
+        .task-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .task-table th, .task-table td {
+            padding: 12px 20px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        .task-table th {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .task-table tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .task-table tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .chart-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        #taskStatusChart {
+            width: 80% !important;
+            height: 300px !important;
+        }
+
+        .status-count {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+
+        .status-count div {
+            background-color: #4CAF50;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 120px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .status-count div h3 {
+            margin: 0;
+        }
+
+        @media (max-width: 768px) {
+            .navbar .menu a {
+                margin-left: 10px;
+                padding: 8px;
+            }
+
+            .navbar .profile {
+                display: none;
+            }
+
+            .status-count {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .status-count div {
+                margin-bottom: 10px;
+                width: 100%;
+            }
+        }
+        a.btn:hover {
+            transform: scale(1.1);
+            transition: transform 0.2s ease-in-out;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <div class="navbar">
+        <div class="profile">
+            <h3 style="background-color: whitesmoke;">Welcome: {{ data.first_name }}</h3>
+        </div>
+        <div class="menu">
+            <a href="{% url 'show_profile' %}">Profile</a>
+            <a href="{% url 'logout' %}">Logout</a>
+
+        </div>
+    </div>
+
+
+    <div class="main-content">
+        <center><h2>Task Status Overview</h2></center>
+
+        <div class="status-count">
+            <div>
+                <h3>Pending</h3>
+                <p>{{ task_status_count.Pending }}</p>
+            </div>
+            <div>
+                <h3>Completed</h3>
+                <p>{{ task_status_count.Completed }}</p>
+            </div>
+            <div>
+                <h3>Create New Task</h3>
+                <a href="{% url 'create_task' %}">Create Task</a>
+            </div>
+        </div>
+
+        <center><h2>Task List</h2></center>
+        <table class="task-table">
+            <thead>
+                <tr>
+                    <th>Sr No</th>
+                    <th>Task Title</th>
+                    <th>Description</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Priority</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for task in tasks %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ task.title }}</td>
+                    <td>{{ task.description }}</td>
+                    <td>{{ task.start_date }}</td>
+                    <td>{{ task.end_date }}</td>
+                    <td>
+                        {% if task.priority == 1 %} High
+                        {% elif task.priority == 2 %} Medium
+                        {% elif task.priority == 3 %} Low
+                        {% endif %}
+                    </td>
+                    <td>
+
+                        <a href="{% url 'edit_task' task.id %}" class="btn btn-sm btn-primary me-2" title="Edit Task">
+                            <i class="bi bi-pencil-square"></i>
+                        </a>
+
+
+                        <a href="{% url 'show_detail' task.id %}" class="btn btn-sm btn-info me-2" title="Show Details">
+                            <i class="bi bi-chat"></i>
+                        </a>
+
+
+                        <a href="{% url 'delete_task' task.id %}" class="btn btn-sm btn-danger" title="Delete Task">
+                            <i class="bi bi-trash"></i>
+                        </a>
+                    </td>
+
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7">No tasks assigned yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+
+    </script>
+</body>
+</html>

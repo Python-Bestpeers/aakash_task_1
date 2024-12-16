@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Details</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .task-header {
+            margin-bottom: 20px;
+        }
+        .task-header h1 {
+            font-size: 28px;
+            font-weight: bold;
+            color: #343a40;
+        }
+        .task-details {
+            border: 1px solid #e9ecef;
+            padding: 15px;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+            margin-bottom: 20px;
+        }
+        .task-details p {
+            margin: 5px 0;
+            font-size: 16px;
+            color: #6c757d;
+        }
+        .comment-section h2 {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+        .comment {
+            padding: 10px;
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            background-color: #f8f9fa;
+        }
+        .comment strong {
+            color: #007bff;
+        }
+        .btn {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Task Header -->
+        <div class="task-header">
+            <h1>Task: {{ task.title }}</h1>
+        </div>
+
+        <!-- Task Details -->
+        <div class="task-details">
+            <p><strong>Description:</strong> {{ task.description }}</p>
+            <p><strong>Assigned By:</strong> {{ task.assigned_by.first_name }} {{ task.assigned_by.last_name }}</p>
+            <p><strong>Assigned To:</strong> {{ task.assigned_to.first_name }} {{ task.assigned_to.last_name }}</p>
+            <p><strong>Status:</strong> {{ task.status }}</p>
+            <p><strong>Priority:</strong> {{ task.priority }}</p>
+            <p><strong>Start Date:</strong> {{ task.start_date|date:"M d, Y" }}</p>
+            <p><strong>End Date:</strong> {{ task.end_date|date:"M d, Y" }}</p>
+        </div>
+
+        <!-- Comments Section -->
+        <div class="comment-section">
+            <h2>Comments</h2>
+            {% for comment in comments %}
+                <div class="comment">
+                    <p><strong>{{ comment.user.first_name }}</strong>: {{ comment.comment }}</p>
+                </div>
+            {% empty %}
+                <p>No comments yet.</p>
+            {% endfor %}
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="actions">
+            <a href="{% url 'add_comment' task.id %}" class="btn btn-success">Add Comment</a>
+            <a href="{% url 'home_page' %}" class="btn btn-secondary">Back to Dashboard</a>
+        </div>
+    </div>
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js"></script>
+</body>
+</html>
