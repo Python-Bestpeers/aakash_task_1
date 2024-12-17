@@ -1,6 +1,7 @@
 from django.contrib.auth import authenticate, get_user_model, login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
+from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views import View
 
@@ -45,7 +46,7 @@ class LoginView(View):
 
 class MyDashboardView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
-        data = get_object_or_404(User, first_name=request.user)
+        data = User.objects.filter(first_name=request.user).first()
         tasks = Task.objects.filter(Q(assigned_to=request.user) | Q(assigned_by=request.user))
         task_status_count = {
             "Pending": 0,
@@ -117,6 +118,10 @@ class AddCommentView(LoginRequiredMixin, View):
     def post(self, request, task_id):
         task = get_object_or_404(Task, id=task_id)
         content = request.POST.get("content")
+        if not content.strip():
+            return render(request, "add_comment.html", {
+                "task": task,
+                "error": "Comment content cannot be empty"})
         Comment.objects.create(task=task, user=request.user, comment=content)
         return redirect("my_dashboard")
 
@@ -166,7 +171,7 @@ class DeleteTaskView(LoginRequiredMixin, View):
             task.delete()
             return redirect("my_dashboard")
         except Task.DoesNotExist:
-            return render(request, "my_dashboard.html", {"error": "Task does not exist"})
+            raise Http404("Task does not exist")
 
 
 class UpdateStatusView(LoginRequiredMixin, View):
@@ -184,6 +189,8 @@ class UpdateStatusView(LoginRequiredMixin, View):
             send_update_status(task)
             form.save()
             return redirect("my_dashboard")
+        else:
+            print(form.errors)
         return render(request, "update_status.html", {"form": form, "task": task})
 
 

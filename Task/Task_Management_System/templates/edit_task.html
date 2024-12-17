@@ -1,8 +1,12 @@
+{% load crispy_forms_tags %}
 <!DOCTYPE html>
 <html>
 <head>
     <title>Edit Task</title>
+    <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <!-- Bootstrap CSS for styling -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -26,36 +30,6 @@
             color: #333;
         }
 
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: #333;
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 10px;
-            font-size: 16px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-        }
-
-        .form-control:focus {
-            border-color: #4CAF50;
-            outline: none;
-        }
-
-        .error-message {
-            color: red;
-            font-size: 14px;
-            margin-top: 5px;
-        }
-
         .btn-submit {
             background-color: #4CAF50;
             color: #fff;
@@ -75,21 +49,15 @@
 <body>
     <div class="form-container">
         <h2 class="form-title">Edit Task</h2>
-        <form method="post" action="{%  url 'edit_task' task.id %}">
+        <form method="post" action="{% url 'edit_task' task.id %}">
             {% csrf_token %}
-            {% for field in form %}
-                <div class="form-group">
-                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                    {{ field }}
-                    {% if field.errors %}
-                        <div class="error-message">
-                            {{ field.errors|striptags }}
-                        </div>
-                    {% endif %}
-                </div>
-            {% endfor %}
+            {{ form|crispy }}
             <button type="submit" class="btn-submit">Update Task</button>
         </form>
     </div>
+
+    <!-- Include Bootstrap JS (optional, for better interactivity) -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
