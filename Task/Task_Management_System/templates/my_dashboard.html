@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.22/css/jquery.dataTables.min.css" />
     <title>User Dashboard</title>
     <style>
         body {
@@ -79,6 +82,7 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
+            padding: 5px;
         }
 
         .task-table th, .task-table td {
@@ -111,15 +115,20 @@
         #taskStatusChart {
             width: 80% !important;
             height: 300px !important;
+
         }
 
-        .status-count {
+        .status-count1 {
             display: flex;
             justify-content: space-around;
             margin-top: 20px;
+            width: 100%;
+            box-sizing: border-box;
+            flex-wrap: wrap;
+            overflow: hidden;
         }
 
-        .status-count div {
+        .status-count1 div {
             background-color: #4CAF50;
             color: white;
             padding: 20px;
@@ -127,30 +136,25 @@
             width: 120px;
             text-align: center;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            min-width: 120px;
+            margin: 5px;
         }
 
-        .status-count div h3 {
+        .status-count1 div h3 {
             margin: 0;
+            font-size: 18px;
         }
 
         @media (max-width: 768px) {
-            .navbar .menu a {
-                margin-left: 10px;
-                padding: 8px;
-            }
-
-            .navbar .profile {
-                display: none;
-            }
-
-            .status-count {
+            .status-count1 {
                 flex-direction: column;
                 align-items: center;
             }
 
-            .status-count div {
+            .status-count1 div {
                 margin-bottom: 10px;
                 width: 100%;
+                min-width: 80px;
             }
         }
         a.btn:hover {
@@ -161,7 +165,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-
     <div class="navbar">
         <div class="profile">
             <h3 style="background-color: whitesmoke;">Welcome: {{ data.first_name }}</h3>
@@ -169,15 +172,11 @@
         <div class="menu">
             <a href="{% url 'show_profile' %}">Profile</a>
             <a href="{% url 'logout' %}">Logout</a>
-
         </div>
     </div>
-
-
     <div class="main-content">
         <center><h2>Task Status Overview</h2></center>
-
-        <div class="status-count">
+        <div class="status-count1">
             <div>
                 <h3>Pending</h3>
                 <p>{{ task_status_count.Pending }}</p>
@@ -191,9 +190,8 @@
                 <a href="{% url 'create_task' %}">Create Task</a>
             </div>
         </div>
-
         <center><h2>Task List</h2></center>
-        <table class="task-table">
+        <table class="task-table" id="tableID">
             <thead>
                 <tr>
                     <th>Sr No</th>
@@ -244,9 +242,18 @@
                 {% endfor %}
             </tbody>
         </table>
-
     </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
 
+    <script src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>
+    <script>
+    $(document).ready(function() {
+        $('#tableID').DataTable();
+    });
     </script>
+    </script>
+
 </body>
 </html>
