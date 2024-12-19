@@ -316,17 +316,17 @@
                             {% endif %}
                           </td>
 
-                          <td> </td>
                           <td class="align-middle" style="color: black;">
                             {{ current_task.status }}
                           </td>
+                          <td class="align-middle" style="color: black;">
+                            {{ task.start_date }}
+                            </td>
 
                           <td class="align-middle" style="color: black;">
                               {{ task.end_date }}
                           </td>
                           <td class="align-middle">
-                            <a href="{% url 'update_status' task.id %}" class="btn btn-sm btn-primary me-2" title="Edit Task">
-                                <i class="bi bi-pencil-square"></i>
                             <a href="{% url 'show_detail' task.id %}" class="btn btn-sm btn-info me-2" title="Show Details">
                                     <i class="bi bi-chat"></i>
                             </a>
@@ -382,6 +382,29 @@
     <script>
     $(document).ready(function() {
         $('#tableID').DataTable();
+    });
+    $(document).ready( function () {
+
+    $('#tableaufiltre').DataTable({
+        order: [[0, 'desc']],
+        "language": {
+            "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/French.json"
+        },
+        columnDefs: [
+            {
+                targets: 11,
+                render: $.fn.dataTable.render.ellipsis( 20 )
+            },
+            ]
+    });
+
+    $('#tableaufiltre').DataTable( {
+        dom: 'Bfrtip',
+        buttons: [
+            'excel'
+        ]
+    } );
+
     });
     </script>
     </script>

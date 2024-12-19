@@ -185,6 +185,11 @@ class UpdateStatusView(LoginRequiredMixin, View):
     def get(self, request, task_id):
         task = get_object_or_404(Task, id=task_id)
         form = StatusUpdateForm(instance=task)
+        return render(request, "update_status.html", {"task": task, "form": form})
+
+    def post(self, request, task_id):
+        task = get_object_or_404(Task, id=task_id)
+        form = StatusUpdateForm(request.POST, instance=task)
         dependent_tasks = Task.objects.filter(
             assigned_to=task.assigned_to,
             start_date__lt=task.start_date,
@@ -195,27 +200,17 @@ class UpdateStatusView(LoginRequiredMixin, View):
                 messages.error(
                     request,
                     f"You cannot update the status of this task until the previous task \
-                         '{last_task.title}' is marked as 'Completed'.",
+                        '{last_task.title}' is marked as 'Completed'.",
                 )
                 return redirect("my_dashboard")
+        if form.is_valid():
+            form.save()
+            send_update_status(task)
+            messages.success(request, f"Task '{task.title}' status updated successfully.")
+            return redirect("my_dashboard")
+        else:
+            messages.error(request, "There was an error updating the task status.")
 
-        return render(request, "update_status.html", {"task": task, "form": form})
-
-    def post(self, request, task_id):
-        task = get_object_or_404(Task, id=task_id)
-        form = StatusUpdateForm(request.POST, instance=task)
-        previous_task = Task.objects.filter(Q(id__lt=task.id) & Q(assigned_to=request.user)).last()
-        if not previous_task or previous_task.status == "Completd":
-            if form.is_valid():
-                if task.status == "Completed":
-                    task.status = "Completed"
-                else:
-                    task.status = form.cleaned_data['status']
-                form.save()
-                send_update_status(task)
-                messages.success(request, f"Task '{task.title}' status updated successfully.")
-                return redirect("my_dashboard")
-        messages.error(request, "There was an error updating the task status.")
         return render(request, "update_status.html", {"form": form, "task": task})
 
 
