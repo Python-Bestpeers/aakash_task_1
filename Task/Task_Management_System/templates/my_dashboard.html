@@ -138,6 +138,7 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             min-width: 120px;
             margin: 5px;
+            padding: 3px;
         }
 
         .status-count1 div h3 {
@@ -191,57 +192,187 @@
             </div>
         </div>
         <center><h2>Task List</h2></center>
-        <table class="task-table" id="tableID">
-            <thead>
-                <tr>
-                    <th>Sr No</th>
-                    <th>Task Title</th>
-                    <th>Description</th>
-                    <th>Start Date</th>
-                    <th>End Date</th>
-                    <th>Priority</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for task in tasks %}
-                <tr>
-                    <td>{{ forloop.counter }}</td>
-                    <td>{{ task.title }}</td>
-                    <td>{{ task.description }}</td>
-                    <td>{{ task.start_date }}</td>
-                    <td>{{ task.end_date }}</td>
-                    <td>
-                        {% if task.priority == 1 %} High
-                        {% elif task.priority == 2 %} Medium
-                        {% elif task.priority == 3 %} Low
+        <div class="container py-5 h-100">
+            <div class="row d-flex justify-content-center align-items-center h-100">
+              <div class="col-md-12 col-xl-10">
+
+                <div class="card mask-custom">
+                  <div class="card-body p-4 text-white">
+                    <div>
+                      {% if messages %}
+                        <div class="messages">
+                          {% for message in messages %}
+                            <div class="alert alert-danger ">
+                              {{ message }}
+                          {% endfor %}
+                        </div>
+                      {% endif %}
+                      </div>
+
+                    <table class="task-table" id="tableID">
+                      <thead>
+                        <tr>
+                            <th>Assigned By</th>
+                            <th>Task Title</th>
+                            <th>Priority</th>
+                            <th>Status</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                          {% for task in completed_task %}
+                        <tr class="fw-normal">
+                          <td>
+                            <span class="ms-2" style="color: black;">{{ task.assigned_by }}</span>
+                          </td>
+                          <td class="align-middle" style="color: black;">
+                            <span>{{ task.title }}</span>
+                          </td>
+                          <td class="ms-2" style="color: black;">
+                            {% if task.priority == 1 %} High
+                            {% elif task.priority == 2 %} Medium
+                            {% elif task.priority == 3 %} Low
+                            {% endif %}
+                          </td>
+
+                          <td class="align-middle" style="color: black;">
+                              {{ task.status }}
+                          </td>
+                          <td class="align-middle" style="color: black;">
+                            {{ task.start_date }}
+                          </td>
+
+                          <td class="align-middle" style="color: black;">
+                              {{ task.end_date }}
+                          </td>
+                          <td class="align-middle">
+                            <a href="{% url 'update_status' task.id %}" class="btn btn-sm btn-primary me-2" title="Edit Task">
+                                <i class="bi bi-pencil-square"></i>
+                            <a href="{% url 'show_detail' task.id %}" class="btn btn-sm btn-info me-2" title="Show Details">
+                                    <i class="bi bi-chat"></i>
+                            </a>
+                            <a href="{% url 'delete_task' task.id %}" class="btn btn-sm btn-danger" title="Delete Task">
+                                    <i class="bi bi-trash"></i>
+                            </a>
+                          </td>
+
+                        </tr>
+
+                        {% endfor %}
+                        {% if current_task %}
+                        <tr class="fw-normal">
+                          <th>
+                            <span class="ms-2" style="color: black;">{{ current_task.assigned_by }}</span>
+                          </th>
+                          <td class="align-middle" style="color: black;">
+                            <span>{{ current_task.title }}</span>
+                          </td>
+                          <td class="ms-2" style="color: black;">
+                            {% if current_task.priority == 1 %} High
+                            {% elif current_task.priority == 2 %} Medium
+                            {% elif current_task.priority == 3 %} Low
+                            {% endif %}
+                          </td>
+
+                          <td class="align-middle" style="color: black;">
+                              {{ current_task.status }}
+                          </td>
+
+                          <td class="align-middle" style="color: black;">
+                              {{ current_task.start_date }}
+                          </td>
+                          <td class="align-middle" style="color: black;">
+                            {{ current_task.end_date }}
+                        </td>
+                          <td class="align-middle">
+                            <a href="{% url 'update_status' current_task.id %}" class="btn btn-sm btn-primary me-2" title="Edit Task">
+                                <i class="bi bi-pencil-square"></i>
+                            <a href="{% url 'show_detail' current_task.id %}" class="btn btn-sm btn-info me-2" title="Show Details">
+                                    <i class="bi bi-chat"></i>
+                            </a>
+                            <a href="{% url 'delete_task' current_task.id %}" class="btn btn-sm btn-danger" title="Delete Task">
+                                    <i class="bi bi-trash"></i>
+                            </a>
+                          </td>
+
+
+                        </tr>
                         {% endif %}
-                    </td>
-                    <td>
 
-                        <a href="{% url 'edit_task' task.id %}" class="btn btn-sm btn-primary me-2" title="Edit Task">
-                            <i class="bi bi-pencil-square"></i>
-                        </a>
+                        {% for task in incomplete_task %}
+                        <tr class="fw-normal">
+                          <th>
+                            <span class="ms-2" style="color: black;">{{ task.assigned_by }}</span>
+                          </th>
+                          <td class="align-middle" style="color: black;">
+                            <span>{{ task.title }}</span>
+                          </td>
+                          <td class="ms-2" style="color: black;">
+                            {% if task.priority == 1 %} High
+                            {% elif task.priority == 2 %} Medium
+                            {% elif task.priority == 3 %} Low
+                            {% endif %}
+                          </td>
+
+                          <td> </td>
+                          <td class="align-middle" style="color: black;">
+                            {{ current_task.status }}
+                          </td>
+
+                          <td class="align-middle" style="color: black;">
+                              {{ task.end_date }}
+                          </td>
+                          <td class="align-middle">
+                            <a href="{% url 'update_status' task.id %}" class="btn btn-sm btn-primary me-2" title="Edit Task">
+                                <i class="bi bi-pencil-square"></i>
+                            <a href="{% url 'show_detail' task.id %}" class="btn btn-sm btn-info me-2" title="Show Details">
+                                    <i class="bi bi-chat"></i>
+                            </a>
+                            <a href="{% url 'delete_task' task.id %}" class="btn btn-sm btn-danger" title="Delete Task">
+                                    <i class="bi bi-trash"></i>
+                            </a>
+                          </td>
+
+                        </tr>
+                        {% empty %}
+                        <tr class="fw-normal">
+                          <th>
+
+                            <span class="ms-2" style="color: black;"></span>
+                          </th>
+                          <td class="align-middle" style="color: black;">
+                            <span></span>
+                          </td>
+                          <td class="align-middle">
+                          </td>
+
+                          <td> </td>
+                          <td class="align-middle" style="color: black;">
+
+                          </td>
+
+                          <td class="align-middle" style="color: black;">
+                          </td>
+                          <td class="align-middle">
+
+                          </td>
+
+                        </tr>
 
 
-                        <a href="{% url 'show_detail' task.id %}" class="btn btn-sm btn-info me-2" title="Show Details">
-                            <i class="bi bi-chat"></i>
-                        </a>
+                        {% endfor %}
+                      </tbody>
+                    </table>
 
 
-                        <a href="{% url 'delete_task' task.id %}" class="btn btn-sm btn-danger" title="Delete Task">
-                            <i class="bi bi-trash"></i>
-                        </a>
-                    </td>
+                  </div>
+                </div>
 
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="7">No tasks assigned yet.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+              </div>
+            </div>
+          </div>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
