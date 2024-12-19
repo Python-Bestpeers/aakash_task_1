@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django.contrib.auth import authenticate, get_user_model, login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
@@ -46,22 +47,26 @@ class LoginView(View):
 
 class MyDashboardView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
-        data = User.objects.filter(first_name=request.user).first()
-        tasks = Task.objects.filter(Q(assigned_to=request.user) | Q(assigned_by=request.user))
+        completed_task = Task.objects.filter(assigned_to=request.user).filter(status="Completed").order_by('id')
+        current_task = Task.objects.filter(Q(assigned_to=request.user) & Q(status="Pending")).first()
         task_status_count = {
-            "Pending": 0,
-            "Completed": 0,
+            "Pending": Task.objects.filter(Q(assigned_to=request.user) & Q(status="Pending")).count(),
+            "Completed": completed_task.count(),
         }
-        for task in tasks:
-            if task.status == "Pending":
-                task_status_count["Pending"] += 1
-            elif task.status == "Completed":
-                task_status_count["Completed"] += 1
-        return render(
-            request,
-            "my_dashboard.html",
-            {"tasks": tasks, "task_status_count": task_status_count, "data": data},
-        )
+        if current_task:
+            incomplete_task = Task.objects.filter(
+                Q(assigned_to=request.user) & Q(status="Pending")).exclude(id=current_task.id).order_by('id')
+        else:
+            incomplete_task = Task.objects.filter(
+                Q(assigned_to=request.user) & Q(status="Pending")).order_by('id')
+        context = {
+            'data': request.user,
+            "completed_task": completed_task,
+            "incomplete_task": incomplete_task,
+            "current_task": current_task,
+            'task_status_count': task_status_count
+        }
+        return render(request, 'my_dashboard.html', context)
 
 
 class ShowProfileView(LoginRequiredMixin, View):
@@ -180,17 +185,32 @@ class UpdateStatusView(LoginRequiredMixin, View):
     def get(self, request, task_id):
         task = get_object_or_404(Task, id=task_id)
         form = StatusUpdateForm(instance=task)
-        return render(request, "update_status.html", {'task': task, "form": form})
+        return render(request, "update_status.html", {"task": task, "form": form})
 
     def post(self, request, task_id):
         task = get_object_or_404(Task, id=task_id)
         form = StatusUpdateForm(request.POST, instance=task)
+        dependent_tasks = Task.objects.filter(
+            assigned_to=task.assigned_to,
+            start_date__lt=task.start_date,
+        ).order_by("start_date")
+        if dependent_tasks.exists():
+            last_task = dependent_tasks.last()
+            if last_task.status != "Completed":
+                messages.error(
+                    request,
+                    f"You cannot update the status of this task until the previous task \
+                        '{last_task.title}' is marked as 'Completed'.",
+                )
+                return redirect("my_dashboard")
         if form.is_valid():
-            send_update_status(task)
             form.save()
+            send_update_status(task)
+            messages.success(request, f"Task '{task.title}' status updated successfully.")
             return redirect("my_dashboard")
         else:
-            print(form.errors)
+            messages.error(request, "There was an error updating the task status.")
+
         return render(request, "update_status.html", {"form": form, "task": task})
 
 
