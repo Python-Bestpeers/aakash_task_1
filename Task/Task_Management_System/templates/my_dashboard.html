@@ -175,6 +175,7 @@
         </div>
     </div>
     <div class="main-content">
+        <h3 style="background-color: red;">{{error}}</h3>
         <center><h2>Task Status Overview</h2></center>
         <div class="status-count1">
             <div>
@@ -191,6 +192,14 @@
             </div>
         </div>
         <center><h2>Task List</h2></center>
+        <div>
+            <form method="GET" action="{% url 'export_csv' %}">
+                {{ form.as_p }}
+                <button type="submit" class="btn btn-primary">Generate Report</button>
+                <button type="submit" name="export" value="true" class="btn btn-success">Export to CSV</button>
+            </form>
+        </div>
+
         <table class="task-table" id="tableID">
             <thead>
                 <tr>
@@ -232,6 +241,11 @@
                         <a href="{% url 'delete_task' task.id %}" class="btn btn-sm btn-danger" title="Delete Task">
                             <i class="bi bi-trash"></i>
                         </a>
+
+                        <a href="{% url 'createsubtask' task.id %}" class="btn btn-sm btn-new" title="Create SubTask">
+                            <i class="fas fa-tasks"></i> Create SubTask
+                        </a>
+
                     </td>
 
                 </tr>
@@ -252,7 +266,16 @@
     $(document).ready(function() {
         $('#tableID').DataTable();
     });
-    </script>
+
+    $(document).ready(function () {
+        var table = $('#tableID').DataTable();
+        table.on('search.dt', function () {
+            $('#searchInput').val(table.search());
+        });
+        $('#exportForm').on('submit', function () {
+            $('#searchInput').val(table.search());
+        });
+    });
     </script>
 
 </body>

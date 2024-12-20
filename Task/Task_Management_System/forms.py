@@ -5,7 +5,7 @@ from django.contrib.auth.hashers import make_password
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 
-from .models import Task, User
+from .models import SubTask, Task, User
 
 
 class TaskForm(forms.ModelForm):
@@ -111,3 +111,24 @@ class StatusUpdateForm(forms.ModelForm):
         widgets = {
             "end_date": forms.DateInput(attrs={"type": "date"}),
         }
+
+
+class ReportForm(forms.Form):
+    start_date = forms.DateField(required=False, widget=forms.DateInput(attrs={'type': 'date'}))
+    end_date = forms.DateField(required=False, widget=forms.DateInput(attrs={'type': 'date'}))
+    priority = forms.ChoiceField(
+        choices=[('1', 'High'), ('2', 'Medium'), ('3', 'Low')],
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control'}))
+
+
+class SubTaskForm(forms.ModelForm):
+    class Meta:
+        model = SubTask
+        fields = ["parent_task", "title", "status"]
+
+
+class UpdateSubtaskForm(forms.ModelForm):
+    class Meta:
+        model = SubTask
+        fields = ["title", "status"]

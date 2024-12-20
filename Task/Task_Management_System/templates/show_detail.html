@@ -5,6 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css">
     <title>Task Details</title>
+    <style>
+        .task-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            padding: 5px;
+        }
+
+        .task-table th, .task-table td {
+            padding: 12px 20px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        .task-table th {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .task-table tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .task-table tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+    </style>
 </head>
 <body>
     <div class="container mt-5">
@@ -33,7 +60,36 @@
                         <p><strong>End Date:</strong> {{ task.end_date|date:"Y-m-d" }}</p>
                         <p><strong>Assigned By:</strong> {{ task.assigned_by }}</p>
                         <p><strong>Assigned To:</strong> {{ task.assigned_to }}</p>
+                        <center><h3>Sub-Task Details</h3></center>
+
+                        <table class="task-table" id="tableID">
+                            <thead>
+                                <tr>
+                                    <th>Sub-Task Title</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+
+                                {% for subtask in subtasks %}
+                            <tbody>
+                                <tr>
+                                    <td>{{ subtask.title}}</td>
+                                    <td>{{ subtask.status }}</td>
+                                    <td><a href="{% url 'updatesubtask' subtask.id %}">Update Subtask</a></td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="3">No tasks assigned yet.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+
+                        </table>
+
                     </div>
+
+
                     <div class="card-footer text-center">
                         <a href="{% url 'add_comment' task.id %}" class="btn btn-success">Add Comment</a>
                     </div>

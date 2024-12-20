@@ -2,9 +2,11 @@ from django.urls import path
 
 from .views import (
     AddCommentView,
+    CreateSubtaskView,
     CreateTaskView,
     DeleteTaskView,
     EditTaskView,
+    ExportCSVView,
     HomePageView,
     LoginView,
     LogoutView,
@@ -14,6 +16,7 @@ from .views import (
     ShowProfileView,
     SignupView,
     UpdateStatusView,
+    UpdateSubtask,
 )
 
 urlpatterns = [
@@ -30,4 +33,7 @@ urlpatterns = [
     path("show_profile/", ShowProfileView.as_view(), name="show_profile"),
     path("my_dashboard/", MyDashboardView.as_view(), name="my_dashboard"),
     path("update_status/<int:task_id>/", UpdateStatusView.as_view(), name='update_status'),
+    path("export_csv/", ExportCSVView.as_view(), name="export_csv"),
+    path("createsubtask/<int:task_id>/", CreateSubtaskView.as_view(), name='createsubtask'),
+    path("updatesubtask/<int:subtask_id>/", UpdateSubtask.as_view(), name='updatesubtask'),
 ]
