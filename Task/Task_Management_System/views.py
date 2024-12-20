@@ -1,12 +1,21 @@
 from django.contrib.auth import authenticate, get_user_model, login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
-from django.http import Http404
+from django.http import Http404, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views import View
 
-from .forms import EditTaskForm, SignupForm, StatusUpdateForm, TaskForm
-from .models import Comment, Task
+from .csvconverter import export_to_csv
+from .forms import (
+    EditTaskForm,
+    ReportForm,
+    SignupForm,
+    StatusUpdateForm,
+    SubTaskForm,
+    TaskForm,
+    UpdateSubtaskForm,
+)
+from .models import Comment, SubTask, Task
 from .utils import send_update_mail, send_update_status
 
 User = get_user_model()
@@ -131,7 +140,8 @@ class ShowDetailView(LoginRequiredMixin, View):
 
     def get(self, request, task_id):
         task = get_object_or_404(Task, id=task_id)
-        return render(request, "show_detail.html", {"task": task})
+        sub_tasks = SubTask.objects.filter(parent_task=task)
+        return render(request, "show_detail.html", {"task": task, 'subtasks': sub_tasks})
 
 
 class ShowCommentView(LoginRequiredMixin, View):
@@ -150,8 +160,12 @@ class EditTaskView(LoginRequiredMixin, View):
 
     def get(self, request, task_id):
         task = get_object_or_404(Task, id=task_id)
-        form = EditTaskForm(instance=task)
-        return render(request, "edit_task.html", {"task": task, "form": form})
+        # breakpoint()
+        if task.assigned_by == request.user:
+            form = EditTaskForm(instance=task)
+            return render(request, "update_status.html", {"task": task, "form": form})
+        else:
+            return HttpResponseForbidden("You are not authorized to access or update this task.")
 
     def post(self, request, task_id):
         task = get_object_or_404(Task, id=task_id)
@@ -179,8 +193,11 @@ class UpdateStatusView(LoginRequiredMixin, View):
 
     def get(self, request, task_id):
         task = get_object_or_404(Task, id=task_id)
-        form = StatusUpdateForm(instance=task)
-        return render(request, "update_status.html", {'task': task, "form": form})
+        if task.assigned_by == request.user:
+            form = StatusUpdateForm(instance=task)
+            return render(request, "update_status.html", {'task': task, "form": form})
+        else:
+            return HttpResponseForbidden("You are not authorized to access or update this task.")
 
     def post(self, request, task_id):
         task = get_object_or_404(Task, id=task_id)
@@ -192,6 +209,78 @@ class UpdateStatusView(LoginRequiredMixin, View):
         else:
             print(form.errors)
         return render(request, "update_status.html", {"form": form, "task": task})
+
+
+class ExportCSVView(LoginRequiredMixin, View):
+    login_url = 'login'
+
+    def get(self, request):
+        form = ReportForm(request.GET)
+        if form.is_valid():
+            start_date = form.cleaned_data.get('start_date')
+            end_date = form.cleaned_data.get('end_date')
+            priority = form.cleaned_data.get('priority')
+            tasks = Task.objects.all()
+            if start_date and end_date:
+                tasks = tasks.filter(start_date__gte=start_date, end_date__lte=end_date)
+            elif start_date:
+                tasks = tasks.filter(start_date__gte=start_date)
+            elif end_date:
+                tasks = tasks.filter(end_date__lte=end_date)
+            if priority:
+                tasks = tasks.filter(priority=priority)
+            if 'export' in request.GET:
+                return export_to_csv(tasks)
+            return render(request, 'my_dashboard.html', {'form': form, 'tasks': tasks})
+        return render(request, 'my_dashboard.html', {'form': form})
+
+
+class CreateSubtaskView(LoginRequiredMixin, View):
+    login_url = 'login'
+
+    def get(self, request, task_id):
+        task = get_object_or_404(Task, id=task_id)
+        form = SubTaskForm()
+        return render(request, 'createsubtask.html', {'task': task, 'form': form})
+
+    def post(self, request, task_id):
+        task = get_object_or_404(Task, id=task_id)
+        form = SubTaskForm(request.POST)
+        if form.is_valid():
+            subtask = form.save(commit=False)
+            subtask.parent_task = task
+            subtask.save()
+            return redirect('my_dashboard')
+        else:
+            return render(request, 'createsubtask.html', {'form': form, 'error': "Enter valid data"})
+
+
+class UpdateSubtask(LoginRequiredMixin, View):
+    login_url = 'login'
+
+    def get(self, request, subtask_id):
+        subtask = SubTask.objects.get(id=subtask_id)
+        if subtask.assigned_to == request.user:
+            form = UpdateSubtaskForm(instance=subtask)
+            if subtask:
+                return render(request, 'updatesubtask.html', {'form': form})
+        else:
+            return render(request, "my_dashboard.html", {'error': "not a authorized user"})
+
+    def post(self, request, subtask_id):
+        subtask = SubTask.objects.get(id=subtask_id)
+        parent_task = subtask.parent_task
+        form = UpdateSubtaskForm(request.POST, instance=subtask)
+        total_task = SubTask.objects.filter(parent_task=parent_task)
+        if form.is_valid():
+            form.save()
+            if total_task.filter(status="Pending").exists():
+                parent_task.status = "Pending"
+            else:
+                parent_task.status = "Completed"
+            parent_task.save()
+            return redirect("my_dashboard")
+        return render(request, "updatesubtask.html", {"form": form, "task": subtask})
 
 
 class LogoutView(LoginRequiredMixin, View):

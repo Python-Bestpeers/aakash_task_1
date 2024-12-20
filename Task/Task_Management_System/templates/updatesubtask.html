@@ -3,7 +3,6 @@
 <html>
 <head>
     <title>Add Comment</title>
-    <!-- Bootstrap CSS for styling -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
         body {
@@ -51,23 +50,19 @@
 </head>
 <body>
     <div class="form-container">
-        <h1 class="form-title">Update Task: {{ task.title }}</h1>
+        <h3 style="background-color: red;">{{ error }}</h3>
         <form method="post">
             {% csrf_token %}
             <div class="form-group">
                 {{ form.title|as_crispy_field }}
-                {{ form.priority|as_crispy_field }}
                 {{ form.status|as_crispy_field }}
-                {{ form.end_date|as_crispy_field }}
-                {{ form.description|as_crispy_field }}
             </div>
             <button type="submit" class="btn btn-success btn-block btn-submit">
-                Submit Comment
+                Update Subtask
             </button>
         </form>
         <br>
-        <!-- Back to Dashboard Button -->
-        <a href="{% url 'home_page' %}" class="btn btn-primary btn-block">
+        <a href="{% url 'my_dashboard' %}" class="btn btn-primary btn-block">
             Back to Dashboard
         </a>
     </div>

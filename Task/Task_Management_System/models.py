@@ -55,6 +55,16 @@ class Task(TimeStampedModel):
         return self.title
 
 
+class SubTask(TimeStampedModel):
+    STATUS_CHOICES = [
+        ("Pending", "Pending"),
+        ("Completed", "Completed"),
+    ]
+    parent_task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name="sub_tasks")
+    title = models.CharField(max_length=255)
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default="Pending")
+
+
 class Comment(TimeStampedModel):
     comment = models.CharField(max_length=400)
     task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name="comments")
